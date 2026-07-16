@@ -1,0 +1,16 @@
+services:
+  nimbus-feedback-dashboard:
+    build: .
+    container_name: nimbus-feedback-dashboard
+    restart: unless-stopped
+    environment:
+      DATA_DIR: /data
+      INBOX_CSV: /inbox/nimbus_feedback_latest.csv
+      IMPORT_INTERVAL_SECONDS: 120
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: CHANGE_THIS_TO_A_LONG_PASSWORD
+    volumes:
+      - /volume1/docker/nimbus-feedback/data:/data
+      - /volume1/docker/nimbus-feedback/inbox:/inbox:ro
+    ports:
+      - "18080:8080"
