@@ -33,11 +33,9 @@ h3 { font-size: 1.04rem; }
 .card, .meta-card, .guide-qr { background: var(--white); border: 1px solid var(--line); border-radius: 13px; padding: 23px; }
 label, legend { display: block; margin: 0 0 7px; font-weight: 650; }
 input:not([type=checkbox]):not([type=radio]), select, textarea { width: 100%; min-height: 44px; padding: 9px 12px; color: var(--ink); background: #fbfcfa; border: 1px solid #bacac2; border-radius: 7px; }
-#guide-form > input { margin-bottom: 15px; }
+#guide-form > input, #guide-code-field { margin-bottom: 15px; }
 input::placeholder, textarea::placeholder { color: #65766f; }
 textarea { margin-bottom: 13px; resize: vertical; }
-.check { display: flex; align-items: center; gap: 8px; color: var(--muted); margin: 0 0 16px; font-size: .9rem; font-weight: 500; }
-.check input { width: 17px; height: 17px; margin: 0; accent-color: var(--accent); }
 .actions, .qr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
 button, .primary, .secondary { min-height: 43px; border-radius: 7px; cursor: pointer; }
 .primary, .secondary, .plain { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 9px 16px; font-weight: 700; }

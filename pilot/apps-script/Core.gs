@@ -13,11 +13,11 @@ function pilotText_(value, max, required) {
 }
 
 function pilotGroup_(value) {
-  return pilotText_(value, 64, true).normalize('NFKC').trim().toUpperCase();
+  return pilotText_(pilotText_(value, 64, true).normalize('NFKC').trim().toUpperCase(), 64, true);
 }
 
 function pilotName_(value) {
-  return pilotText_(value, 64, true).normalize('NFKC').trim().replace(/\s+/g, ' ');
+  return pilotText_(pilotText_(value, 64, true).normalize('NFKC').trim().replace(/\s+/g, ' '), 64, true);
 }
 
 function pilotId_(value) {
@@ -67,7 +67,7 @@ function pilotRequestCore_(action, payload, store) {
     const existing = segments.find(segment => segment.group === group &&
       segment.city.toLowerCase() === city.toLowerCase() &&
       segment.guide.toLowerCase() === guide.toLowerCase());
-    if (existing && payload.newSegment !== true) return pilotSegment_(existing);
+    if (existing) return pilotSegment_(existing);
 
     const segment = { token: store.uuid().toLowerCase(), requestId, group, city, guide, createdAt: new Date().toISOString() };
     store.addSegment(segment);
@@ -96,27 +96,30 @@ function pilotRequestCore_(action, payload, store) {
     if (!store.authorized(payload.pin)) throw new Error('unauthorized');
     const group = pilotGroup_(payload.group);
     const segments = store.segments().filter(segment => segment.group === group);
-    const byToken = new Map(segments.map(segment => [segment.token, []]));
-    const reviews = store.reviews().filter(review => byToken.has(review.token));
-    reviews.forEach(review => byToken.get(review.token).push(review));
-
-    return {
-      group,
-      ...pilotSummarize_(reviews),
-      segments: segments.map(segment => {
-        const entries = byToken.get(segment.token);
-        return {
-          ...pilotSegment_(segment),
-          ...pilotSummarize_(entries),
-          reviews: entries.slice().reverse().map(review => ({
-            overall: review.ratings.overall,
-            low: pilotLow_(review.ratings),
-            comment: review.comment,
-          })),
-        };
-      }),
-    };
+    return pilotGroupSummary_(group, segments, store.reviews().filter(review => segments.some(segment => segment.token === review.token)));
   }
 
   throw new Error('invalid_action');
+}
+
+function pilotGroupSummary_(group, segments, reviews) {
+  const byToken = new Map(segments.map(segment => [segment.token, []]));
+  reviews.forEach(review => byToken.get(review.token).push(review));
+
+  return {
+    group,
+    ...pilotSummarize_(reviews),
+    segments: segments.map(segment => {
+      const entries = byToken.get(segment.token);
+      return {
+        ...pilotSegment_(segment),
+        ...pilotSummarize_(entries),
+        reviews: entries.slice().reverse().map(review => ({
+          overall: review.ratings.overall,
+          low: pilotLow_(review.ratings),
+          comment: review.comment,
+        })),
+      };
+    }),
+  };
 }

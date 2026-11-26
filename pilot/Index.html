@@ -44,7 +44,10 @@
             </datalist>
             <label for="guide-name">导游姓名</label>
             <input id="guide-name" name="guide" required maxlength="64" placeholder="请输入姓名" autocomplete="name">
-            <label class="check"><input type="checkbox" name="newSegment"> 同城分队或返程时另建服务段</label>
+            <div id="guide-code-field" hidden>
+              <label for="guide-code">同事测试码</label>
+              <input id="guide-code" name="guideCode" type="password" maxlength="128" autocomplete="off">
+            </div>
             <div class="actions">
               <button type="submit" class="primary">生成二维码</button>
               <button type="button" id="fill-example" class="plain" hidden>填入测试团号</button>

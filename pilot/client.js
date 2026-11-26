@@ -113,13 +113,20 @@ $('ops-link').href = opsURL;
 $('guide-link').target = '_top';
 $('ops-link').target = '_top';
 $('staff-nav').hidden = view === 'guest';
-$('mode-note').hidden = mode !== 'demo' || view === 'guest';
+const notice = $('mode-note');
+notice.hidden = !['demo', 'shared'].includes(mode) || view === 'guest';
+if (mode === 'shared') notice.textContent = '多人测试版。请使用模拟团号和模拟评价。';
 $(view).hidden = false;
 
 function setupGuide() {
   $('guide-link').setAttribute('aria-current', 'page');
   const form = $('guide-form');
   let pending = null;
+  if (mode === 'shared') {
+    $('guide-code-field').hidden = false;
+    $('guide-code').required = true;
+    $('guide-code').value = sessionStorage.getItem('nimbus-pilot-guide-code') || '';
+  }
   $('fill-example').hidden = mode === 'google';
   $('fill-example').addEventListener('click', () => {
     $('group').value = 'NIMBUS-TEST-001';
@@ -131,7 +138,8 @@ function setupGuide() {
   form.addEventListener('submit', async event => {
     event.preventDefault();
     const values = new FormData(form);
-    const payload = { group: values.get('group'), city: values.get('city'), guide: values.get('guide'), newSegment: values.has('newSegment') };
+    const payload = { group: values.get('group'), city: values.get('city'), guide: values.get('guide') };
+    if (mode === 'shared') payload.guideCode = values.get('guideCode');
     const signature = JSON.stringify(payload);
     if (!pending || pending.signature !== signature) pending = { signature, requestId: randomId() };
     const button = event.submitter;
@@ -149,11 +157,12 @@ function setupGuide() {
       $('guest-link-text').hidden = true;
       $('qr-empty').hidden = true;
       $('qr-result').hidden = false;
-      form.elements.newSegment.checked = false;
+      if (mode === 'shared') sessionStorage.setItem('nimbus-pilot-guide-code', payload.guideCode);
       pending = null;
       status('guide-status', '已生成，可以发给本站游客。', 'success');
     } catch (error) {
-      const message = error.message === 'invalid_input' ? '请检查姓名、团号和城市。' : '暂时无法生成，请重试。';
+      const messages = { invalid_input: '请检查姓名、团号和城市。', unauthorized: '同事测试码不正确。' };
+      const message = messages[error.message] || '暂时无法生成，请重试。';
       status('guide-status', message, 'error');
     } finally {
       button.disabled = false;
