@@ -14,12 +14,15 @@ const template = read('./Index.html')
   .replace('/* PILOT_QR_LIBRARY */', () => '/*\n' + read('./vendor/LICENSE') + '*/\n' + read('./vendor/qrcode.js'))
   .replace('/* PILOT_CLIENT */', () => read('./client.js'));
 
-export function render(mode) {
+export function render(mode, api = '') {
   const demo = mode === 'demo' ? coreSource + '\n' + read('./demo.js') : '';
   const markup = template.replace('/* PILOT_LOCAL_TRANSPORT */', () => demo);
   if (mode === 'google') return markup;
-  const variables = { mode, base: '', view: '', token: '' };
-  return markup.replace(/<\?= (mode|base|view|token) \?>/g, (_, key) => variables[key]);
+  if (api && !/^https:\/\/[a-z0-9.-]+\/api$/i.test(api)) {
+    throw new Error('Shared API must be an HTTPS /api endpoint.');
+  }
+  const variables = { mode, base: '', view: '', token: '', api };
+  return markup.replace(/<\?= (mode|base|view|token|api) \?>/g, (_, key) => variables[key]);
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {

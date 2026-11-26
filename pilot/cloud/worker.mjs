@@ -1,5 +1,6 @@
 // The build prepends the existing form renderer and Apps Script validation helpers.
 const knownErrors = new Set(['invalid_input', 'invalid_rating', 'invalid_action', 'missing_segment', 'unauthorized']);
+const pagesOrigin = 'https://nimbustravelint1.github.io';
 const headers = {
   'Cache-Control': 'no-store',
   'Referrer-Policy': 'no-referrer',
@@ -108,15 +109,25 @@ export default {
     if (request.method === 'GET' && pathname === '/') {
       return new Response(PILOT_HTML, { headers: { ...headers, 'Content-Type': 'text/html; charset=UTF-8' } });
     }
+    const origin = request.headers.get('Origin');
+    const apiHeaders = { ...headers, Vary: 'Origin' };
+    if (origin === pagesOrigin) apiHeaders['Access-Control-Allow-Origin'] = pagesOrigin;
+    if (request.method === 'OPTIONS' && pathname === '/api') {
+      if (origin !== pagesOrigin) return new Response(null, { headers: apiHeaders, status: 403 });
+      apiHeaders['Access-Control-Allow-Methods'] = 'POST, OPTIONS';
+      apiHeaders['Access-Control-Allow-Headers'] = 'Content-Type';
+      apiHeaders['Access-Control-Max-Age'] = '600';
+      return new Response(null, { headers: apiHeaders, status: 204 });
+    }
     if (request.method !== 'POST' || pathname !== '/api') return new Response(null, { headers, status: 404 });
     try {
       const { action, payload } = await parseBody(request) || {};
       const result = await dispatch(action, payload, env);
-      return Response.json({ ok: true, result }, { headers });
+      return Response.json({ ok: true, result }, { headers: apiHeaders });
     } catch (error) {
       const code = knownErrors.has(error.message) ? error.message : 'unavailable';
       if (code === 'unavailable') console.error(error);
-      return Response.json({ ok: false, error: code }, { headers });
+      return Response.json({ ok: false, error: code }, { headers: apiHeaders });
     }
   },
 };

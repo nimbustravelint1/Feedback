@@ -7,6 +7,7 @@ const token = mode === 'google' ? document.body.dataset.token : query.get('guest
 const view = mode === 'google' ? document.body.dataset.view :
   token ? 'guest' : query.get('view') === 'ops' ? 'ops' : 'guide';
 const base = document.body.dataset.base || location.href;
+const endpoint = document.body.dataset.api || '/api';
 const languages = ['zh', 'en', 'ru', 'es'];
 const fields = ['overall', 'guide', 'itinerary', 'attractions', 'hotel', 'restaurant'];
 const dictionaries = {
@@ -73,7 +74,7 @@ async function rpc(action, payload) {
   const response = mode === 'google' ? await new Promise((resolve, reject) =>
     google.script.run.withSuccessHandler(resolve).withFailureHandler(() => reject(new Error('unavailable')))
       .pilotRequest(action, payload)
-  ) : await fetch('/api', {
+  ) : await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action, payload }),

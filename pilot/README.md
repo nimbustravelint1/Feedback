@@ -43,3 +43,13 @@ node pilot/serve.mjs
 ## 共享测试服务
 
 `node pilot/cloud/build.mjs` 将本仓库中的表单和业务规则打包成 Cloudflare Worker。运行时需要绑定 `DB`，部署前在该数据库执行 `pilot/cloud/schema.sql`，并配置 `PILOT_GUIDE_CODE` 和 `PILOT_OPS_PIN` 两个不同的私密访问码。游客扫码后直接提交。导游和运营各使用对应的访问码。
+
+## 发布到 GitHub Pages
+
+共享测试站可单独发布静态入口。运行以下命令，把 `main` 的 `pilot/index.html` 更新为最新版本。原 GitHub Actions 发布工作流会同时发布原表单和新版入口。
+
+```sh
+node pilot/cloud/build-pages.mjs /path/to/main/pilot/index.html https://YOUR-SHARED-BACKEND/api
+```
+
+Pages 上的游客二维码使用 Pages 地址。评价通过 HTTPS 写入共享后端。后端的 CORS 允许 `https://nimbustravelint1.github.io` 访问；客户端发布产物不包含任何访问码。

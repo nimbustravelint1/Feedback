@@ -7,6 +7,7 @@ function doGet(e) {
   template.mode = 'google';
   template.base = ScriptApp.getService().getUrl();
   template.token = String(parameters.guest || '').slice(0, 64);
+  template.api = '';
   template.view = parameters.guest ? 'guest' : parameters.view === 'ops' ? 'ops' : 'guide';
   return template.evaluate()
     .setTitle('Nimbus Travel | 游客评价')
