@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f5f1">
+  <title>Nimbus Travel | 游客评价</title>
+  <style>
+    /* PILOT_STYLES */
+  </style>
+</head>
+<body data-mode="<?= mode ?>" data-base="<?= base ?>" data-view="<?= view ?>" data-token="<?= token ?>">
+  <header class="top">
+    <div class="top-inner">
+      <a id="brand" class="brand" aria-label="Nimbus Travel"><!-- PILOT_LOGO --></a>
+      <nav id="staff-nav" aria-label="工作入口" hidden>
+        <a id="guide-link">导游入口</a>
+        <a id="ops-link">运营后台</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <p id="mode-note" class="notice" hidden>单机体验版。记录保存在此浏览器，游客链接可在同一浏览器预览。</p>
+    <section id="guide" hidden>
+      <div class="intro">
+        <h1>生成游客评价二维码</h1>
+        <p>按出团计划填写团号，生成后把二维码发给本站游客。</p>
+      </div>
+      <div class="guide-layout">
+        <div class="card">
+          <form id="guide-form">
+            <label for="group">团号</label>
+            <input id="group" name="group" required maxlength="64" placeholder="如 NTS-2026-001" autocapitalize="characters" spellcheck="false">
+            <label for="city">城市</label>
+            <input id="city" name="city" required maxlength="64" placeholder="选择或输入城市" list="cities" autocomplete="off">
+            <datalist id="cities">
+              <option>北京</option><option>上海</option><option>西安</option><option>成都</option><option>重庆</option>
+              <option>广州</option><option>深圳</option><option>杭州</option><option>苏州</option><option>张家界</option>
+              <option>香港</option><option>澳门</option><option>三亚</option><option>桂林</option><option>昆明</option>
+              <option>丽江</option><option>大理</option><option>武汉</option><option>郑州</option><option>洛阳</option>
+              <option>南京</option><option>厦门</option><option>福州</option><option>青岛</option><option>大连</option>
+              <option>哈尔滨</option><option>长春</option><option>沈阳</option><option>乌鲁木齐</option><option>喀什</option>
+              <option>天津</option><option>拉萨</option><option>凤凰</option><option>敦煌</option><option>珠海</option>
+            </datalist>
+            <label for="guide-name">导游姓名</label>
+            <input id="guide-name" name="guide" required maxlength="64" placeholder="请输入姓名" autocomplete="name">
+            <label class="check"><input type="checkbox" name="newSegment"> 同城分队或返程时另建服务段</label>
+            <div class="actions">
+              <button type="submit" class="primary">生成二维码</button>
+              <button type="button" id="fill-example" class="plain" hidden>填入测试团号</button>
+            </div>
+          </form>
+          <p class="status" id="guide-status" role="status"></p>
+        </div>
+        <div class="card qr-card">
+          <h2>游客二维码</h2>
+          <div id="qr-empty" class="qr-empty"><span aria-hidden="true"></span><p>生成后可保存二维码或复制链接</p></div>
+          <div id="qr-result" hidden>
+            <p id="qr-meta" class="qr-meta"></p>
+            <canvas id="guest-qr" aria-label="游客评价二维码" role="img"></canvas>
+            <div class="qr-actions">
+              <a id="download-qr" class="secondary" download="Nimbus-guest-feedback.png">保存图片</a>
+              <button id="copy-guest" type="button" class="secondary">复制链接</button>
+            </div>
+            <a id="open-guest" class="text-link" target="_blank" rel="noopener">打开游客表单 ↗</a>
+            <input id="guest-link-text" class="copy-url" aria-label="游客表单链接" readonly hidden>
+          </div>
+        </div>
+      </div>
+      <details class="guide-qr">
+        <summary>查看固定导游入口二维码</summary>
+        <canvas id="guide-qr" aria-label="固定导游入口二维码" role="img"></canvas>
+        <a id="download-guide-qr" class="text-link" download="Nimbus-guide-entry.png">保存导游入口二维码</a>
+      </details>
+    </section>
+    <section id="guest" class="guest-layout" hidden>
+      <div class="guest-head">
+        <label class="sr-only" for="lang">Language</label>
+        <select id="lang" aria-label="Language">
+          <option value="zh">中文</option><option value="en">English</option>
+          <option value="ru">Русский</option><option value="es">Español</option>
+        </select>
+      </div>
+      <div class="intro">
+        <h1 id="guest-title"></h1>
+        <p id="guest-intro"></p>
+      </div>
+      <div id="guest-meta" class="meta-card" hidden></div>
+      <form id="guest-form" class="card" hidden>
+        <div id="ratings"></div>
+        <label for="comment" id="comment-label"></label>
+        <textarea id="comment" name="comment" rows="3" maxlength="2000"></textarea>
+        <button type="submit" class="primary" id="guest-submit"></button>
+      </form>
+      <p id="guest-status" class="status" role="status"></p>
+    </section>
+    <section id="ops" hidden>
+      <div class="intro">
+        <h1>团组评价汇总</h1>
+        <p>按团号查看各站的评价、低分和留言。</p>
+      </div>
+      <form id="ops-form" class="card lookup">
+        <div><label for="find-group">团号</label><input id="find-group" name="group" required maxlength="64" placeholder="输入团号" spellcheck="false"></div>
+        <div id="pin-field"><label for="pin">运营访问码</label><input id="pin" name="pin" type="password" maxlength="128" required autocomplete="current-password"></div>
+        <button type="submit" class="primary">查询</button>
+      </form>
+      <p id="ops-status" class="status" role="status"></p>
+      <div id="report"></div>
+    </section>
+    <noscript>此表单需要 JavaScript。Please enable JavaScript to continue.</noscript>
+  </main>
+  <script>/* PILOT_QR_LIBRARY */</script>
+  <script>/* PILOT_LOCAL_TRANSPORT */</script>
+  <script>/* PILOT_CLIENT */</script>
+</body>
+</html>
